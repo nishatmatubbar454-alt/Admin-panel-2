@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click2Cash Messenger</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        :root {
+            --brand-gradient: linear-gradient(135deg, #b3782b, #d4a056);
+            --brand-color: #b3782b;
+        }
+
+        body, html { margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; height: 100%; background: #fff; }
+
+        .top-banner {
+            background: var(--brand-gradient);
+            padding: 25px 15px;
+            color: white;
+            text-align: center;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+        .profile-area { display: flex; align-items: center; gap: 15px; justify-content: center; margin-bottom: 10px; }
+        .profile-img { width: 60px; height: 60px; border-radius: 50%; border: 2px solid white; overflow: hidden; background: #eee; display: flex; align-items: center; justify-content: center;}
+        .profile-img i { font-size: 40px; color: #b3782b; }
+        
+        /* লেখা বড় করা হয়েছে */
+        .user-meta h2 { margin: 0; font-size: 22px; }
+        .user-meta p { margin: 0; font-size: 14px; opacity: 0.9; }
+
+        .chat-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 160px);
+        }
+
+        #chat-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* মেসেজ বাবল বড় করা হয়েছে */
+        .msg { max-width: 80%; padding: 14px 18px; border-radius: 22px; font-size: 17px; line-height: 1.4; }
+        .received { align-self: flex-start; background: #e4e6eb; color: #050505; border-bottom-left-radius: 4px; }
+        .sent { align-self: flex-end; background: var(--brand-color); color: white; border-bottom-right-radius: 4px; }
+
+        .chip-container {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            overflow-x: auto;
+            white-space: nowrap;
+            scrollbar-width: none;
+        }
+        .chip {
+            border: 2px solid var(--brand-color);
+            color: var(--brand-color);
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background: white;
+        }
+
+        .bottom-nav {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-box {
+            flex: 1;
+            background: #f0f2f5;
+            border-radius: 25px;
+            padding: 12px 20px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+        .send-btn { color: var(--brand-color); font-size: 28px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="top-banner">
+        <div class="profile-area">
+            <div class="profile-img"><i class="fas fa-user-circle"></i></div>
+            <div class="user-meta">
+                <h2>Erfan Ahmed</h2>
+                <p>ID: 8235864550</p>
+            </div>
+        </div>
+        <div style="font-size: 15px; font-weight: bold;">সাপোর্ট সেন্টারে স্বাগতম</div>
+    </div>
+
+    <div class="chat-wrapper">
+        <div id="chat-content">
+            </div>
+
+        <div class="chip-container">
+            <div class="chip" onclick="quickReply('উইথড্র সমস্যা ⏳', 'আপনার পেমেন্ট ২৪ ঘন্টার মধ্যে ক্লিয়ার হয়ে যাবে।')">উইথড্র সমস্যা</div>
+            <div class="chip" onclick="quickReply('টাকা জমা হচ্ছে না ❌', 'টাস্ক শেষে ১০ সেকেন্ড অপেক্ষা করুন।')">টাস্ক সমস্যা</div>
+        </div>
+
+        <div class="bottom-nav">
+            <input type="text" id="userInput" class="input-box" placeholder="Aa">
+            <i class="fas fa-paper-plane send-btn" onclick="sendMsg()"></i>
+        </div>
+    </div>
+
+    <script>
+        const userId = "8235864550";
+        const chatBox = document.getElementById('chat-content');
+
+        // চ্যাট লোড করার ফাংশন
+        function render() {
+            const chats = JSON.parse(localStorage.getItem('chat_' + userId)) || [];
+            chatBox.innerHTML = chats.map(c => `<div class="msg ${c.type}">${c.text}</div>`).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // মেসেজ সেভ করার ফাংশন
+        function pushMsg(text, type) {
+            let chats = JSON.parse(localStorage.getItem('chat_' + userId)) || [];
+            chats.push({ text, type });
+            localStorage.setItem('chat_' + userId, JSON.stringify(chats));
+            render();
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('userInput');
+            if (!input.value.trim()) return;
+            pushMsg(input.value, 'sent');
+            input.value = "";
+        }
+
+        // অটো রিপ্লাই ফাংশন (উইথড্র সমস্যা ইত্যাদি)
+        function quickReply(q, a) {
+            pushMsg(q, 'sent');
+            setTimeout(() => {
+                pushMsg(a, 'received');
+            }, 800);
+        }
+
+        // প্রতি ১ সেকেন্ডে চ্যাট আপডেট হবে (অ্যাডমিন রিপ্লাই দেখার জন্য)
+        setInterval(render, 1000);
+        render(); // প্রথমবার লোড করার জন্য
+    </script>
+</body>
+</html>
